@@ -18,7 +18,7 @@ default_args = {
 dag = DAG('minio_test', default_args=default_args, schedule_interval="@once")
 
 
-def write_text_file(ds, **kwargs):
+def write_text_file:
     # Upload generated file to Minio
     s3 = S3Hook('local_s3')
     s3.load_file("/opt/airflow/dags/README.md", key=f"test-file.txt", bucket_name="airflow")
