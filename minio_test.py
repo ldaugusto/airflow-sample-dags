@@ -19,15 +19,9 @@ dag = DAG('minio_test', default_args=default_args, schedule_interval="@once")
 
 
 def write_text_file(ds, **kwargs):
-    with open("/tmp/test.txt", "w") as fp:
-        # Add file generation/processing step here, E.g.:
-        fp.write(ds)
-
-        # Upload generated file to Minio
-        s3 = S3Hook('local_s3')
-        s3.load_file("/tmp/test.txt",
-                     key=f"my-test-file.txt",
-                     bucket_name="airflow-forwards")
+    # Upload generated file to Minio
+    s3 = S3Hook('local_s3')
+    s3.load_file("/opt/airflow/dags/README.md", key=f"test-file.txt", bucket_name="airflow")
 
 
 # Create a task to call your processing function
