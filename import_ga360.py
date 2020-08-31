@@ -2,8 +2,8 @@ import datetime
 
 from airflow import DAG
 from airflow.contrib.operators import bigquery_get_data
-from airflow.contrib.operators import bigquery_operator
-from airflow.contrib.operators import bigquery_to_gcs
+from airflow.contrib.operators.bigquery_operator import BigQueryOperator
+from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
 from airflow.operators import bash_operator
 from airflow.operators import email_operator
 from airflow.utils import trigger_rule
@@ -47,4 +47,4 @@ t2 = BigQueryToCloudStorageOperator(
     compression='GZIP',
     export_format='CSV')
 
-t1 >>> t2
+t1 >> t2
