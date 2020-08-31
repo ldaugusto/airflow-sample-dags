@@ -25,10 +25,9 @@ default_args = {
     'retry_delay': datetime.timedelta(minutes=5),
 }
 
-dag = DAG(
-        'composer_sample_bq_notify',
-        schedule_interval=timedelta(days=1),
-        default_args=default_args)
+dag = DAG('ga360_etl',
+        	schedule_interval=timedelta(days=1),
+        	default_args=default_args)
 
 t1 = BigQueryOperator(
     task_id='bq_unnest_yesterdays_table',
@@ -45,7 +44,7 @@ t2 = BigQueryToCloudStorageOperator(
     bigquery_conn_id='zwift_ga360_bigquery',
     source_project_dataset_table=target_table,
     destination_cloud_storage_uris=[output_file],
-    compression='GZIP'
+    compression='GZIP',
     export_format='CSV')
 
 t1 >>> t2
