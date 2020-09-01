@@ -5,7 +5,7 @@ from airflow.contrib.operators import bigquery_get_data
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
 from airflow.contrib.operators.bigquery_table_delete_operator import BigQueryTableDeleteOperator
-from airflow.providers.amazon.aws.transfers.gcs_to_s3 import GCSToS3Operator
+from custom_operator.gcs_to_s3 import GoogleCloudStorageToS3Operator
 
 from airflow.operators import bash_operator
 from airflow.operators import email_operator
@@ -41,7 +41,7 @@ prepare_ga360 = BigQueryOperator(
     sql="""SELECT visitId, clientId FROM `{source_table}`""".format(source_table=source_table),
     use_legacy_sql=False,
     destination_dataset_table=target_table
-    )
+)
 
 extract_ga360_to_gcs = BigQueryToCloudStorageOperator(
 	dag=dag,
@@ -51,7 +51,7 @@ extract_ga360_to_gcs = BigQueryToCloudStorageOperator(
     destination_cloud_storage_uris=[output_file],
     compression='GZIP',
     export_format='CSV'
-    )
+)
 
 export_gcs_to_s3 = GCSToS3Operator(
 	dag=dag,
@@ -67,7 +67,8 @@ delete_tmp_table = BigQueryTableDeleteOperator(
     task_id="delete_tmp_table", 
     bigquery_conn_id='zwift_ga360_bigquery',
     deletion_dataset_table=target_table
-    )
-
+)
 
 prepare_ga360 >> extract_ga360_to_gcs >> export_gcs_to_s3 >> delete_tmp_table
+
+
