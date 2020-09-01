@@ -53,6 +53,7 @@ export_gcs_to_s3 = GoogleCloudStorageToS3Operator(
     dag=dag,
     task_id="cp_gcs_to_s3",
     gcp_conn_id='zwift_ga360_bigquery',
+    google_cloud_storage_conn_id='zwift_ga360_bigquery',
     dest_aws_conn_id='local_s3',
     dest_verify=False,
     bucket=gcs_bucket
