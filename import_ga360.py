@@ -56,7 +56,7 @@ export_gcs_to_s3 = GoogleCloudStorageToS3Operator(
     dest_aws_conn_id='local_s3',
     dest_verify=False,
     bucket=gcs_bucket,
-    dest_s3_key=gcs_bucket
+    dest_s3_key='s3://airflow/'
 )
 
 delete_tmp_table = BigQueryTableDeleteOperator(
