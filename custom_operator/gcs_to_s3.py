@@ -77,7 +77,7 @@ class GoogleCloudStorageToS3Operator(GoogleCloudStorageListOperator):
         self.dest_verify = dest_verify
         self.replace = replace
 
-	def execute(self, context):
+    def execute(self, context):
         # use the super to list all files in an Google Cloud Storage bucket
         files = super(GoogleCloudStorageToS3Operator, self).execute(context)
         s3_hook = S3Hook(aws_conn_id=self.dest_aws_conn_id, verify=self.dest_verify)
