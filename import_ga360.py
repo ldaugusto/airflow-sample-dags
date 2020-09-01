@@ -4,8 +4,7 @@ from airflow import DAG
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
 from airflow.contrib.operators.bigquery_table_delete_operator import BigQueryTableDeleteOperator
-from custom_operator.gcs_to_s3 import GoogleCloudStorageToS3Operator
-
+from airflow.contrib.operators.gcs_to_s3 import GoogleCloudStorageToS3Operator
 from airflow.utils.dates import days_ago
 from datetime import timedelta
 
@@ -56,7 +55,8 @@ export_gcs_to_s3 = GoogleCloudStorageToS3Operator(
     google_cloud_storage_conn_id='zwift_ga360_bigquery',
     dest_aws_conn_id='local_s3',
     dest_verify=False,
-    bucket=gcs_bucket
+    bucket=gcs_bucket,
+    dest_s3_key=gcs_bucket
 )
 
 delete_tmp_table = BigQueryTableDeleteOperator(
