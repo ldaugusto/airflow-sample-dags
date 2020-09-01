@@ -77,4 +77,6 @@ delete_tmp_table = BigQueryTableDeleteOperator(
     deletion_dataset_table=target_table
 )
 
-prepare_ga360 >> extract_ga360_to_gcs >> export_gcs_to_s3
+prepare_ga360 >> extract_ga360_to_gcs
+extract_ga360_to_gcs >> [export_gcs_to_s3, delete_tmp_table]
+export_gcs_to_s3 >> load_redshift
