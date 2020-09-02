@@ -32,11 +32,16 @@ dag = DAG('ga360_etl',
           schedule_interval=timedelta(days=1),
           default_args=default_args)
 
+
+bq_extract_query = """with sessions as (select * from `{source_table}`), 
+                           userId as (select visitId, dimension.value as userId, clientId from sessions cross join unnest(customDimensions) as dimension where dimension.index = 10), data as (select userId.userId, sessions.fullVisitorId, sessions.clientId, sessions.visitId, sessions.hits, sessions.visitStartTime, sessions.date from sessions left join userId on sessions.visitId = userId.visitId and sessions.clientId = userId.clientId)
+                      select userId as distinct_id, clientId, visitId, visitStartTime, date, fullVisitorId, hit.hitNumber, hit.page.pagePath, hit.appInfo.screenName , hit.page.hostname, hit.page.pageTitle, hit.type as hit_type from data cross join unnest(hits) as hit"""
+
 prepare_ga360 = BigQueryOperator(
     dag=dag,
     task_id='bq_unnest_table',
     bigquery_conn_id='zwift_ga360_bigquery',
-    sql="""SELECT visitId, clientId FROM `{source_table}`""".format(source_table=source_table),
+    sql=bq_extract_query.format(source_table=source_table),
     use_legacy_sql=False,
     destination_dataset_table=target_table
 )
