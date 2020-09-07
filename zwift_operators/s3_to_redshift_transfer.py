@@ -61,8 +61,7 @@ class S3ToRedshiftTransfer(BaseOperator):
         self.autocommit = autocommit
 
         self.hook = PostgresHook(postgres_conn_id=self.redshift_conn_id)
-
-        redshift_extras = BaseHook.get_connection(self.redshift_conn_id).extra_dejson
+        redshift_extras = self.hook.conn.extra_dejson
         self.iam_role = redshift_extras.get('iam_role')
         if self.iam_role is None:
             raise AirflowException('No iam_role file provided in extras')
