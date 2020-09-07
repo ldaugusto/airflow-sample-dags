@@ -78,7 +78,7 @@ class S3ToRedshiftTransfer(BaseOperator):
         copy_query = """
             COPY {schema}.{table}
             FROM '{file}'
-            iam_role {iam_role}
+            iam_role '{iam_role}'
             {copy_options};
         """.format(schema=self.schema,
                    table=self.table,
