@@ -16,7 +16,7 @@ class S3ToRedshiftTransfer(BaseOperator):
     :param table: reference to a specific table in redshift database
     :type table: str
     :param s3_file: reference to a specific S3 object (bucket and key)
-        or objects prefix for parallel Redshift load
+        or objects prefix for parallel Redshift load (templated)
     :type s3_file: str
     :param redshift_conn_id: reference to a specific redshift database
     :type redshift_conn_id: str
@@ -37,7 +37,7 @@ class S3ToRedshiftTransfer(BaseOperator):
     :type copy_options: list
     """
 
-    template_fields = ()
+    template_fields = ('s3_file')
     template_ext = ()
     ui_color = '#ededed'
 
@@ -72,12 +72,16 @@ class S3ToRedshiftTransfer(BaseOperator):
     def execute(self, context):
         copy_options = '\t'.join(self.copy_options)
 
-        copy_query = f"""
-            COPY {self.schema}.{self.table}
-            FROM '{self.s3_file}'
-            iam_role '{self.iam_role}'
-            {copy_options} ;"""
+        copy_query = """
+            COPY {schema}.{table}
+            FROM {file}
+            iam_role '{iam_role}'
+            {copy_options} ;""".format(schema=self.schema,
+                                       table=self.table,
+                                       file=self.s3_file,
+                                       iam_role=self.iam_role,
+                                       copy_options=copy_options)
 
-        self.log.info('Executing COPY command...' + copy_query)
+        self.log.info('Executing COPY command...')
         self.hook.run(copy_query, self.autocommit)
         self.log.info("COPY command complete...")
