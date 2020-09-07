@@ -68,7 +68,7 @@ export_gcs_to_s3 = GoogleCloudStorageToS3Operator(
     google_cloud_storage_conn_id='zwift_ga360_bigquery',
     bucket=gcs_bucket,
     dest_aws_conn_id='local_s3',
-    dest_s3_key=output_file
+    dest_s3_key='s3://' + s3_bucket
 )
 
 load_redshift = S3ToRedshiftTransfer(
