@@ -78,6 +78,6 @@ class S3ToRedshiftTransfer(BaseOperator):
             iam_role '{self.iam_role}'
             {copy_options} ;"""
 
-        self.log.info('Executing COPY command...')
+        self.log.info('Executing COPY command...' + copy_query)
         self.hook.run(copy_query, self.autocommit)
         self.log.info("COPY command complete...")
