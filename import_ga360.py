@@ -3,7 +3,7 @@ from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
 from airflow.contrib.operators.bigquery_table_delete_operator import BigQueryTableDeleteOperator
 from airflow.contrib.operators.gcs_to_s3 import GoogleCloudStorageToS3Operator
-from airflow.operators.s3_to_redshift_operator import S3ToRedshiftTransfer
+from zwift_operators.s3_to_redshift_transfer import S3ToRedshiftTransfer
 from airflow.utils.dates import days_ago
 from datetime import timedelta
 
@@ -16,7 +16,6 @@ bigquery_project_id = '104737153'
 source_table = bigquery_project_id + '.ga_sessions_{{ ds_nodash }}'
 target_table = bigquery_project_id + '.ga_tmp_{{ ds_nodash }}'
 
-# [START composer_notify_failure]
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
@@ -32,10 +31,16 @@ dag = DAG('ga360_etl',
           schedule_interval=timedelta(days=1),
           default_args=default_args)
 
-
 bq_extract_query = """with sessions as (select * from `{source_table}`), 
-                           userId as (select visitId, dimension.value as userId, clientId from sessions cross join unnest(customDimensions) as dimension where dimension.index = 10), data as (select userId.userId, sessions.fullVisitorId, sessions.clientId, sessions.visitId, sessions.hits, sessions.visitStartTime, sessions.date from sessions left join userId on sessions.visitId = userId.visitId and sessions.clientId = userId.clientId)
-                      select userId as distinct_id, clientId, visitId, visitStartTime, date, fullVisitorId, hit.hitNumber, hit.page.pagePath, hit.appInfo.screenName , hit.page.hostname, hit.page.pageTitle, hit.type as hit_type from data cross join unnest(hits) as hit"""
+                           userId as (select visitId, dimension.value as userId, clientId
+                                      from sessions cross join unnest(customDimensions) as dimension
+                                      where dimension.index = 10), 
+                           data as (select userId.userId, sessions.fullVisitorId, sessions.clientId, sessions.visitId, sessions.hits, sessions.visitStartTime, sessions.date 
+                                    from sessions left join userId 
+                                        on sessions.visitId = userId.visitId
+                                        and sessions.clientId = userId.clientId)
+                      select userId as distinct_id, clientId, visitId, visitStartTime, date, fullVisitorId, hit.hitNumber, hit.page.pagePath, hit.appInfo.screenName , hit.page.hostname, hit.page.pageTitle, hit.type as hit_type
+                      from data cross join unnest(hits) as hit"""
 
 prepare_ga360 = BigQueryOperator(
     dag=dag,
@@ -69,10 +74,11 @@ export_gcs_to_s3 = GoogleCloudStorageToS3Operator(
 load_redshift = S3ToRedshiftTransfer(
     dag=dag,
     task_id="redshift_load",
-    s3_bucket=s3_bucket,
-    s3_key=output_file,
+    redshift_conn_id='zwift_redshift_dev',
+    s3_file=s3_output_file,
     schema='public',
-    table='ga360_sessions'
+    table='ga360_sessions',
+    copy_options='CSV'
 )
 
 delete_tmp_table = BigQueryTableDeleteOperator(
