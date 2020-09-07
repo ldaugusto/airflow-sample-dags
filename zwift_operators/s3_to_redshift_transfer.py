@@ -61,6 +61,7 @@ class S3ToRedshiftTransfer(BaseOperator):
         self.autocommit = autocommit
 
         self.hook = PostgresHook(postgres_conn_id=self.redshift_conn_id)
+        print(self.hook.get_conn().__dict__.items())
         redshift_extras = self.hook.get_conn().extra_dejson
         self.iam_role = redshift_extras.get('iam_role')
         if self.iam_role is None:
