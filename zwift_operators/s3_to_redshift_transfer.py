@@ -2,12 +2,9 @@ from typing import Any, Dict
 
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models.connection import Connection
-from airflow.hooks.S3_hook import S3Hook
-from airflow.hooks.base_hook import BaseHook
 from airflow.models import BaseOperator
 from airflow.exceptions import AirflowException
 from airflow.utils.decorators import apply_defaults
-from psycopg2 import extensions
 
 
 class S3ToRedshiftTransfer(BaseOperator):
@@ -73,17 +70,17 @@ class S3ToRedshiftTransfer(BaseOperator):
             raise AirflowException('No iam_role file provided in extras')
 
     def execute(self, context):
-        copy_options = '\t\t\t\n'.join(self.copy_options)
+        copy_options = '\t'.join(self.copy_options)
 
         copy_query = """
             COPY {schema}.{table}
             FROM '{file}'
             iam_role '{iam_role}'
             {copy_options} ;""".format(schema=self.schema,
-                   table=self.table,
-                   file=self.s3_file,
-                   iam_role=self.iam_role,
-                   copy_options=copy_options)
+                                       table=self.table,
+                                       file=self.s3_file,
+                                       iam_role=self.iam_role,
+                                       copy_options=copy_options)
 
         self.log.info('Executing COPY command...')
         self.hook.run(copy_query, self.autocommit)

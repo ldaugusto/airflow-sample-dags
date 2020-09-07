@@ -10,8 +10,8 @@ from datetime import timedelta
 output_file = '{{ ds_nodash }}.csv.gz'
 s3_bucket = 'airflow'
 s3_output_file = 's3://' + s3_bucket + '/' + output_file
-s3_bucket_real = 's3://zwift-s3-uw2-dev-analytics-redshift/'
-s3_bucket_real_file = 's3://zwift-s3-uw2-dev-analytics-redshift/' + output_file
+s3_bucket_real = 's3://zwift-s3-uw2-dev-analytics-redshift'
+s3_bucket_real_file = s3_bucket_real + '/' + output_file
 gcs_bucket = 'bq-ga360-dumps'
 gcs_output_file = 'gs://' + gcs_bucket + '/' + output_file
 bigquery_project_id = '104737153'
