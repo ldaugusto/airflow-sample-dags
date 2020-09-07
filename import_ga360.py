@@ -80,7 +80,7 @@ load_redshift = S3ToRedshiftTransfer(
     s3_file=s3_bucket_real_file,
     schema='public',
     table='ga360_sessions',
-    copy_options=['CSV IGNOREHEADER']
+    copy_options=['CSV', 'IGNOREHEADER 1', 'GZIP']
 )
 
 delete_tmp_table = BigQueryTableDeleteOperator(
