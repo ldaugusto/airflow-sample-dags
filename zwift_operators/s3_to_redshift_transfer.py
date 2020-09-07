@@ -73,14 +73,13 @@ class S3ToRedshiftTransfer(BaseOperator):
             raise AirflowException('No iam_role file provided in extras')
 
     def execute(self, context):
-        copy_options = '\n\t\t\t'.join(self.copy_options)
+        copy_options = '\t'.join(self.copy_options)
 
         copy_query = """
             COPY {schema}.{table}
             FROM '{file}'
             iam_role '{iam_role}'
-            {copy_options}
-        """.format(schema=self.schema,
+            {copy_options}""".format(schema=self.schema,
                    table=self.table,
                    file=self.s3_file,
                    iam_role=self.iam_role,
