@@ -72,15 +72,11 @@ class S3ToRedshiftTransfer(BaseOperator):
     def execute(self, context):
         copy_options = '\t'.join(self.copy_options)
 
-        copy_query = """
-            COPY {schema}.{table}
-            FROM '{file}'
-            iam_role '{iam_role}'
-            {copy_options} ;""".format(schema=self.schema,
-                                       table=self.table,
-                                       file=self.s3_file,
-                                       iam_role=self.iam_role,
-                                       copy_options=copy_options)
+        copy_query = f"""
+            COPY {self.schema}.{self.table}
+            FROM '{self.s3_file}'
+            iam_role '{self.iam_role}'
+            {copy_options} ;"""
 
         self.log.info('Executing COPY command...')
         self.hook.run(copy_query, self.autocommit)
