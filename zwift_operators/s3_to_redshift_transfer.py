@@ -1,9 +1,13 @@
+from typing import Any, Dict
+
 from airflow.hooks.postgres_hook import PostgresHook
+from airflow.models.connection import Connection
 from airflow.hooks.S3_hook import S3Hook
 from airflow.hooks.base_hook import BaseHook
 from airflow.models import BaseOperator
 from airflow.exceptions import AirflowException
 from airflow.utils.decorators import apply_defaults
+from psycopg2 import extensions
 
 
 class S3ToRedshiftTransfer(BaseOperator):
@@ -60,9 +64,10 @@ class S3ToRedshiftTransfer(BaseOperator):
         self.copy_options = copy_options
         self.autocommit = autocommit
 
-        self.hook = PostgresHook(postgres_conn_id=self.redshift_conn_id)
-        print(self.hook.get_conn().__dict__.items())
-        redshift_extras = self.hook.get_conn().extra_dejson
+        self.hook = PostgresHook(postgres_conn_id=redshift_conn_id)
+        conn: Connection = self.hook.get_connection(conn_id=redshift_conn_id)
+        redshift_extras: Dict[str, Any] = conn.extra_dejson
+
         self.iam_role = redshift_extras.get('iam_role')
         if self.iam_role is None:
             raise AirflowException('No iam_role file provided in extras')
