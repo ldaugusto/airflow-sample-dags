@@ -46,8 +46,8 @@ prepare_ga360 = BigQueryOperator(
     dag=dag,
     task_id='bq_unnest_table',
     bigquery_conn_id='zwift_ga360_bigquery',
-    sql=bq_extract_query.format(source_table=source_table),
     use_legacy_sql=False,
+    sql=bq_extract_query.format(source_table=source_table),
     destination_dataset_table=target_table
 )
 
@@ -78,7 +78,7 @@ load_redshift = S3ToRedshiftTransfer(
     s3_file=s3_output_file,
     schema='public',
     table='ga360_sessions',
-    copy_options='CSV'
+    copy_options=['CSV']
 )
 
 delete_tmp_table = BigQueryTableDeleteOperator(

@@ -48,7 +48,7 @@ class S3ToRedshiftTransfer(BaseOperator):
             s3_file,
             redshift_conn_id='redshift_default',
             verify=None,
-            copy_options='',
+            copy_options=tuple(),
             autocommit=False,
             *args, **kwargs):
         super(S3ToRedshiftTransfer, self).__init__(*args, **kwargs)
