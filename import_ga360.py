@@ -10,6 +10,7 @@ from datetime import timedelta
 output_file = '{{ ds_nodash }}.csv.gz'
 s3_bucket = 'airflow'
 s3_output_file = 's3://' + s3_bucket + '/' + output_file
+s3_bucket_real = 's3://zwift-s3-uw2-dev-analytics-redshift/'
 gcs_bucket = 'bq-ga360-dumps'
 gcs_output_file = 'gs://' + gcs_bucket + '/' + output_file
 bigquery_project_id = '104737153'
@@ -75,7 +76,7 @@ load_redshift = S3ToRedshiftTransfer(
     dag=dag,
     task_id="redshift_load",
     redshift_conn_id='zwift_redshift_dev',
-    s3_file=s3_output_file,
+    s3_file=s3_bucket_real+output_file,
     schema='public',
     table='ga360_sessions',
     copy_options=['CSV']
