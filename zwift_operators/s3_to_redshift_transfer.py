@@ -15,7 +15,7 @@ class S3ToRedshiftTransfer(BaseOperator):
     :type schema: str
     :param table: reference to a specific table in redshift database
     :type table: str
-    :param s3_file: reference to a specific S3 object (bucket and key)
+    :param s3_file: reference to a specific S3 object - bucket and key -
         or objects prefix for parallel Redshift load (templated)
     :type s3_file: str
     :param redshift_conn_id: reference to a specific redshift database
@@ -37,7 +37,7 @@ class S3ToRedshiftTransfer(BaseOperator):
     :type copy_options: list
     """
 
-    template_fields = ('s3_file')
+    template_fields = ['s3_file']
     template_ext = ()
     ui_color = '#ededed'
 
