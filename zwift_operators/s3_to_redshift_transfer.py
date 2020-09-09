@@ -18,8 +18,8 @@ class S3ToRedshiftTransfer(BaseOperator):
     :param s3_file: reference to a specific S3 object - bucket and key -
         or objects prefix for parallel Redshift load (templated)
     :type s3_file: str
-    :param redshift_iam_role: what IAM role Redshift can assume to load from that S3 bucket
-    :type redshift_iam_role: str
+    :param iam_role: what IAM role Redshift can assume to load from that S3 bucket
+    :type iam_role: str
     :param redshift_conn_id: reference to a specific redshift database
     :type redshift_conn_id: str
     :param aws_conn_id: reference to a specific S3 connection
@@ -49,7 +49,7 @@ class S3ToRedshiftTransfer(BaseOperator):
             schema,
             table,
             s3_file,
-            redshift_iam_role,
+            iam_role,
             redshift_conn_id='redshift_default',
             verify=None,
             copy_options=tuple(),

@@ -1,6 +1,6 @@
 {
   "AWS_DEFAULT_REGION": "us-west-2",
-  "google_conn_id": "zwift_ga360_bigquery",
+  "ga360_conn_id": "zwift_ga360_bigquery",
   "ga360_bigquery_project_id": "104737153",
   "ga360_bucket": "bq-ga360-dumps",
   "redshift_conn_id": "zwift_redshift_dev",
