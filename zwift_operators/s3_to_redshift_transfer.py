@@ -65,7 +65,7 @@ class S3ToRedshiftTransfer(BaseOperator):
         self.autocommit = autocommit
 
         self.hook = PostgresHook(postgres_conn_id=redshift_conn_id)
-        self.iam_role = redshift_iam_role
+        self.iam_role = iam_role
         if self.iam_role is None:
             raise AirflowException('No redshift_iam_role variable defined')
 
