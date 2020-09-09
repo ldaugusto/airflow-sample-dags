@@ -8,14 +8,17 @@ from airflow.utils.dates import days_ago
 from zwift_operators.s3_to_redshift_transfer import S3ToRedshiftTransfer
 from datetime import timedelta
 
+google_conn_id = Variable.get("ga360_conn_id")
 bigquery_project_id = Variable.get("ga360_bigquery_project_id")
-gcs_bucket = Variable.get("bq-ga360-dumps")
-s3_bucket_real = 's3://' + Variable.get("redshift_s3_bucket")
+gcs_bucket = Variable.get("ga360_bucket")
+redshift_s3_bucket = 's3://' + Variable.get("redshift_s3_bucket")
+redshift_conn_id = Variable.get("redshift_conn_id")
+redshift_iam_role = Variable.get("redshift_iam_role")
+aws_s3_conn_id = Variable.get("s3_conn_id")
 
-output_file = 'ga360-sessions-{{ ds_nodash }}-*.csv.gz'
-s3_bucket = 'airflow'
-s3_output_file = 's3://' + s3_bucket + '/' + output_file
-s3_bucket_real_file = s3_bucket_real + '/' + output_file
+output_file_prefix = 'ga360-sessions-{{ ds_nodash }}-'
+output_file = output_file_prefix + '*.csv.gz'
+s3_output_file = 's3://' + redshift_s3_bucket + '/' + output_file
 gcs_output_file = 'gs://' + gcs_bucket + '/' + output_file
 
 source_table = bigquery_project_id + '.ga_sessions_{{ ds_nodash }}'
@@ -50,7 +53,7 @@ bq_extract_query = """with sessions as (select * from `{source_table}`),
 prepare_ga360 = BigQueryOperator(
     dag=dag,
     task_id='bq_unnest_table',
-    bigquery_conn_id='zwift_ga360_bigquery',
+    bigquery_conn_id=google_conn_id,
     use_legacy_sql=False,
     sql=bq_extract_query.format(source_table=source_table),
     destination_dataset_table=target_table
@@ -59,7 +62,7 @@ prepare_ga360 = BigQueryOperator(
 extract_ga360_to_gcs = BigQueryToCloudStorageOperator(
     dag=dag,
     task_id='export_recent_yesterday_to_gcs',
-    bigquery_conn_id='zwift_ga360_bigquery',
+    bigquery_conn_id=google_conn_id,
     source_project_dataset_table=target_table,
     destination_cloud_storage_uris=[gcs_output_file],
     compression='GZIP',
@@ -70,26 +73,27 @@ export_gcs_to_s3 = GoogleCloudStorageToS3Operator(
     dag=dag,
     task_id="cp_gcs_to_s3",
     dest_verify=True,
-    google_cloud_storage_conn_id='zwift_ga360_bigquery',
+    google_cloud_storage_conn_id=google_conn_id,
     bucket=gcs_bucket,
     dest_aws_conn_id='local_s3',
-    dest_s3_key='s3://' + s3_bucket + '/'
+    dest_s3_key=redshift_s3_bucket
 )
 
 load_redshift = S3ToRedshiftTransfer(
     dag=dag,
     task_id="redshift_load",
-    redshift_conn_id='zwift_redshift_dev',
-    s3_file=s3_bucket_real_file,
+    redshift_conn_id=redshift_conn_id,
+    s3_file=redshift_s3_bucket,
     schema='public',
     table='ga360_sessions',
+    iam_role=redshift_iam_role,
     copy_options=['CSV', 'IGNOREHEADER 1', 'GZIP', """DATEFORMAT AS 'YYYYMMDD'"""]
 )
 
 delete_tmp_table = BigQueryTableDeleteOperator(
     dag=dag,
     task_id="delete_tmp_table",
-    bigquery_conn_id='zwift_ga360_bigquery',
+    bigquery_conn_id=google_conn_id,
     deletion_dataset_table=target_table
 )
 

@@ -18,6 +18,8 @@ class S3ToRedshiftTransfer(BaseOperator):
     :param s3_file: reference to a specific S3 object - bucket and key -
         or objects prefix for parallel Redshift load (templated)
     :type s3_file: str
+    :param redshift_iam_role: what IAM role Redshift can assume to load from that S3 bucket
+    :type redshift_iam_role: str
     :param redshift_conn_id: reference to a specific redshift database
     :type redshift_conn_id: str
     :param aws_conn_id: reference to a specific S3 connection
@@ -47,6 +49,7 @@ class S3ToRedshiftTransfer(BaseOperator):
             schema,
             table,
             s3_file,
+            redshift_iam_role,
             redshift_conn_id='redshift_default',
             verify=None,
             copy_options=tuple(),
@@ -62,12 +65,9 @@ class S3ToRedshiftTransfer(BaseOperator):
         self.autocommit = autocommit
 
         self.hook = PostgresHook(postgres_conn_id=redshift_conn_id)
-        conn: Connection = self.hook.get_connection(conn_id=redshift_conn_id)
-        redshift_extras: Dict[str, Any] = conn.extra_dejson
-
-        self.iam_role = redshift_extras.get('iam_role')
+        self.iam_role = redshift_iam_role
         if self.iam_role is None:
-            raise AirflowException('No iam_role file provided in extras')
+            raise AirflowException('No redshift_iam_role variable defined')
 
     def execute(self, context):
         copy_options = '\t'.join(self.copy_options)

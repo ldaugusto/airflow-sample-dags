@@ -55,8 +55,8 @@ airflow:
   extraPipPackages:
     - "apache-airflow-backport-providers-google"
     - "apache-airflow-backport-providers-amazon"
+    - "apache-airflow-backport-providers-segment"
     - "pep562"
-    # - "apache-airflow-backport-providers-cncf-kubernetes"
 
 ###################################
 # Airflow - DAGs Configs
