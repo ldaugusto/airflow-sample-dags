@@ -1,20 +1,23 @@
 from airflow import DAG
+from airflow.models import Variable
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
 from airflow.contrib.operators.bigquery_table_delete_operator import BigQueryTableDeleteOperator
 from airflow.contrib.operators.gcs_to_s3 import GoogleCloudStorageToS3Operator
-from zwift_operators.s3_to_redshift_transfer import S3ToRedshiftTransfer
 from airflow.utils.dates import days_ago
+from zwift_operators.s3_to_redshift_transfer import S3ToRedshiftTransfer
 from datetime import timedelta
 
-output_file = '{{ ds_nodash }}.csv.gz'
+bigquery_project_id = Variable.get("ga360_bigquery_project_id")
+gcs_bucket = Variable.get("bq-ga360-dumps")
+s3_bucket_real = 's3://' + Variable.get("redshift_s3_bucket")
+
+output_file = 'ga360-sessions-{{ ds_nodash }}-*.csv.gz'
 s3_bucket = 'airflow'
 s3_output_file = 's3://' + s3_bucket + '/' + output_file
-s3_bucket_real = 's3://zwift-s3-uw2-dev-analytics-redshift'
 s3_bucket_real_file = s3_bucket_real + '/' + output_file
-gcs_bucket = 'bq-ga360-dumps'
 gcs_output_file = 'gs://' + gcs_bucket + '/' + output_file
-bigquery_project_id = '104737153'
+
 source_table = bigquery_project_id + '.ga_sessions_{{ ds_nodash }}'
 target_table = bigquery_project_id + '.ga_tmp_{{ ds_nodash }}'
 

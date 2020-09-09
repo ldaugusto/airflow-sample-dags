@@ -1,0 +1,5 @@
+{
+  "ga360_bigquery_project_id": "104737153",
+  "ga360_bucket": "bq-ga360-dumps",
+  "redshift_s3_bucket": "zwift-s3-uw2-dev-analytics-redshift"
+}
