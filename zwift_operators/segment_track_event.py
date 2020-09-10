@@ -71,10 +71,10 @@ class SegmentTrackEventOperator(BaseOperator):
             user_id = props.get('userId')
 
             if user_id is None:
-                self.log.info('No userId set in CSV row: %s >> Skipping.', props)
+                self.log.info('No userId set in CSV row: %s >>> Skipping.', props)
                 continue
 
-            self.log.info('Sending track event (%s) for user id: %s with properties: %s',
+            self.log.info('Sending track event (%s) for userId %s with properties: %s',
                           self.event, user_id, props)
 
             self.analytics.track(user_id=user_id, event=self.event, properties=props)
