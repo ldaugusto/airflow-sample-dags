@@ -67,8 +67,11 @@ class SegmentTrackEventOperator(BaseOperator):
 
         csv_reader = csv.DictReader(file_reader)
         for row in csv_reader:
+            # converts a csv row into a map: header1 -> value, header2 -> value...
             props = dict(row)
-            user_id = props.get('userId')
+            user_id = props.pop('userId', None)
+            for key in props:
+                props[key] = retype(props.pop(key))
 
             if user_id is None:
                 self.log.info('No userId set in CSV row: %s >>> Skipping.', props)
@@ -78,3 +81,13 @@ class SegmentTrackEventOperator(BaseOperator):
                           self.event, user_id, props)
 
             self.analytics.track(user_id=user_id, event=self.event, properties=props)
+
+
+def retype(value=''):
+    if value.isnumeric():
+        try:
+            return int(value)
+        except ValueError:
+            return float(value)
+    else:
+        return value
