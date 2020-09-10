@@ -61,7 +61,7 @@ class SegmentTrackEventOperator(BaseOperator):
     def execute(self, context):
 
         if self.csv_file.endswith('.gz'):
-            file_reader = gzip.open(self.csv_file, 'r')
+            file_reader = gzip.open(self.csv_file, "rt", newline="")
         else:
             file_reader = open(self.csv_file, 'r')
 
