@@ -77,7 +77,7 @@ class SegmentTrackEventOperator(BaseOperator):
 
             clean_props = dict()
             for key in props:
-                clean_props[key] = retype(props.pop(key))
+                clean_props[key] = retype(props.get(key))
 
             self.log.info('Sending track event (%s) for userId %s with properties: %s',
                           self.event, user_id, clean_props)
