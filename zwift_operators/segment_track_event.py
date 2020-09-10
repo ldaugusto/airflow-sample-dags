@@ -75,6 +75,6 @@ class SegmentTrackEventOperator(BaseOperator):
                 continue
 
             self.log.info('Sending track event (%s) for user id: %s with properties: %s',
-                          self.event, self.user_id, self.properties)
+                          self.event, user_id, props)
 
             self.analytics.track(user_id=user_id, event=self.event, properties=props)
