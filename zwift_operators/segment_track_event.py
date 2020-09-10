@@ -19,56 +19,62 @@
 from airflow.models import BaseOperator
 from airflow.providers.segment.hooks.segment import SegmentHook
 from airflow.utils.decorators import apply_defaults
+import csv
+import gzip
 
 
 class SegmentTrackEventOperator(BaseOperator):
     """
     Send Track Event to Segment for a specified user_id and event
 
-    :param user_id: The ID for this user in your database. (templated)
-    :type user_id: str
+    :param csv_file: a CSV (plain or zipped) path with data to be used as event properties.
+        One of them *must* be called 'userId' (templated)
+    :type csv_file: str
     :param event: The name of the event you're tracking. (templated)
     :type event: str
-    :param properties: A dictionary of properties for the event. (templated)
-    :type properties: dict
     :param segment_conn_id: The connection ID to use when connecting to Segment.
     :type segment_conn_id: str
     :param segment_debug_mode: Determines whether Segment should run in debug mode.
         Defaults to False
     :type segment_debug_mode: bool
     """
-    template_fields = ('user_id', 'event', 'properties')
+    template_fields = ('csv_file', 'event')
     ui_color = '#ffd700'
 
     @apply_defaults
     def __init__(self,
-                 user_id,
                  event,
-                 properties=None,
+                 csv_file,
                  segment_conn_id='segment_default',
                  segment_debug_mode=False,
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs)
-        self.user_id = user_id
         self.event = event
-        properties = properties or {}
-        self.properties = properties
         self.segment_debug_mode = segment_debug_mode
         self.segment_conn_id = segment_conn_id
+        self.csv_file = csv_file
+        self.hook = SegmentHook(segment_conn_id=self.segment_conn_id,
+                                segment_debug_mode=self.segment_debug_mode)
+        self.analytics = self.hook.get_conn()
 
     def execute(self, context):
-        hook = SegmentHook(segment_conn_id=self.segment_conn_id,
-                           segment_debug_mode=self.segment_debug_mode)
 
-        self.log.info(
-            'Sending track event (%s) for user id: %s with properties: %s',
-            self.event, self.user_id, self.properties)
+        if self.csv_file.endswith('.gz'):
+            file_reader = gzip.open(self.csv_file, 'r')
+        else:
+            file_reader = open(self.csv_file, 'r')
 
-        analytics = hook.get_conn()
+        csv_reader = csv.DictReader(file_reader)
+        for row in csv_reader:
+            props = dict(row)
+            user_id = props.get('userId')
 
-        # pylint: disable=no-member
-        analytics.track(
-            user_id=self.user_id,
-            event=self.event,
-            properties=self.properties)
+            if user_id is None:
+                self.log.info('No userId set in CSV row: %s >> Skipping.', props)
+                continue
+
+            self.log.info('Sending track event (%s) for user id: %s with properties: %s',
+                          self.event, self.user_id, self.properties)
+
+            self.analytics.track(user_id=user_id, event=self.event, properties=props)

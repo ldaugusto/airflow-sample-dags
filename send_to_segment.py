@@ -48,12 +48,11 @@ t1 = BashOperator(
 )
 
 t2 = SegmentTrackEventOperator(
-    task_id='segment',
     dag=dag,
-    user_id='daniel-airflow-test',
+    task_id='segment',
+    segment_conn_id='zwift_segment_curated_lnp1',
     event='Airflow',
-    properties={'dog': 'costela', 'iq': 200},
-    segment_conn_id='zwift_segment_curated_lnp1'
+    csv_file='file.csv.gz'
 )
 
 t1 >> t2
