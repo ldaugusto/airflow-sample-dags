@@ -70,17 +70,19 @@ class SegmentTrackEventOperator(BaseOperator):
             # converts a csv row into a map: header1 -> value, header2 -> value...
             props = dict(row)
             user_id = props.pop('userId', None)
-            for key in props:
-                props[key] = retype(props.pop(key))
 
             if user_id is None:
                 self.log.info('No userId set in CSV row: %s >>> Skipping.', props)
                 continue
 
-            self.log.info('Sending track event (%s) for userId %s with properties: %s',
-                          self.event, user_id, props)
+            clean_props = dict()
+            for key in props:
+                clean_props[key] = retype(props.pop(key))
 
-            self.analytics.track(user_id=user_id, event=self.event, properties=props)
+            self.log.info('Sending track event (%s) for userId %s with properties: %s',
+                          self.event, user_id, clean_props)
+
+            self.analytics.track(user_id=user_id, event=self.event, properties=clean_props)
 
 
 def retype(value=''):
