@@ -5,6 +5,7 @@ from airflow.models.connection import Connection
 from airflow.models import BaseOperator
 from airflow.exceptions import AirflowException
 from airflow.utils.decorators import apply_defaults
+from airflow.hooks.base_hook import BaseHook
 
 
 class S3ToRedshiftTransfer(BaseOperator):
@@ -70,6 +71,9 @@ class S3ToRedshiftTransfer(BaseOperator):
             raise AirflowException('No redshift_iam_role variable defined')
 
     def execute(self, context):
+        conn = BaseHook.get_connection('zwift_ga360_bigquery')
+        print(f"AIRFLOW_CONN_{conn.conn_id.upper()}='{conn.get_uri()}'")
+
         copy_options = '\t'.join(self.copy_options)
 
         copy_query = """

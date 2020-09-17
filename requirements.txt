@@ -1,0 +1,5 @@
+analytics-python==1.2.9
+apache-airflow-backport-providers-amazon==2020.6.24
+apache-airflow-backport-providers-apache-hive==2020.6.24
+apache-airflow-backport-providers-segment==2020.6.24
+customerio==0.5.2

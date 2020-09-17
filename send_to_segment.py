@@ -5,7 +5,7 @@ from airflow import DAG
 # Operators; we need this to operate!
 from airflow.operators.bash_operator import BashOperator
 from airflow.utils.dates import days_ago
-from zwift_operators.segment_track_event import SegmentTrackEventOperator
+from zwift.segment.track_event import SegmentTrackEventOperator
 
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
@@ -40,7 +40,7 @@ dag = DAG(
     schedule_interval=timedelta(days=1),
 )
 
-# t1, t2 and t3 are examples of tasks created by instantiating zwift_operators
+# t1, t2 and t3 are examples of tasks created by instantiating zwift
 t1 = BashOperator(
     task_id='print_date',
     bash_command='date',

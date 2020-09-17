@@ -23,22 +23,20 @@ import csv
 import gzip
 
 
-class SegmentTrackEventOperator(BaseOperator):
+class SegmentIdentifyOperator(BaseOperator):
     """
     Send Track Event to Segment for a specified user_id and event
 
     :param csv_file: a CSV (plain or zipped) path with data to be used as event properties.
         One of them *must* be called 'userId' (templated)
     :type csv_file: str
-    :param event: The name of the event you're tracking. (templated)
-    :type event: str
     :param segment_conn_id: The connection ID to use when connecting to Segment.
     :type segment_conn_id: str
     :param segment_debug_mode: Determines whether Segment should run in debug mode.
         Defaults to False
     :type segment_debug_mode: bool
     """
-    template_fields = ('csv_file', 'event')
+    template_fields = ('csv_file')
     ui_color = '#ffd700'
 
     @apply_defaults
@@ -75,6 +73,7 @@ class SegmentTrackEventOperator(BaseOperator):
                 self.log.info('No userId set in CSV row: %s >>> Skipping.', props)
                 continue
 
+            # fixing numerics types set as strings from csv
             clean_props = dict()
             for key in props:
                 clean_props[key] = retype(props.get(key))
@@ -82,7 +81,7 @@ class SegmentTrackEventOperator(BaseOperator):
             self.log.info('Sending track event (%s) for userId %s with properties: %s',
                           self.event, user_id, clean_props)
 
-            self.analytics.track(user_id=user_id, event=self.event, properties=clean_props)
+            self.analytics.identify(user_id=user_id, traits=clean_props)
 
 
 def retype(value=''):

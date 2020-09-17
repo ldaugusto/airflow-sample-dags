@@ -5,7 +5,7 @@ from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOper
 from airflow.contrib.operators.bigquery_table_delete_operator import BigQueryTableDeleteOperator
 from airflow.contrib.operators.gcs_to_s3 import GoogleCloudStorageToS3Operator
 from airflow.utils.dates import days_ago
-from zwift_operators.s3_to_redshift_transfer import S3ToRedshiftTransfer
+from zwift.s3_to_redshift_transfer import S3ToRedshiftTransfer
 from datetime import timedelta
 
 google_conn_id = Variable.get("ga360_conn_id")
